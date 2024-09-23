@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Manager (Function-based)</title>
+<style>
+body { font-family: Arial, sans-serif; }
+.task-complete { text-decoration: line-through; color: green; }
+.task { margin-bottom: 10px; }
+.delete-btn { color: red; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Task Manager</h1>
+<input type="text" id="taskInput" placeholder="Enter new task">
+<button id="addTaskBtn">Add Task</button>
+
+```
+<h2>Tasks:</h2>
+<div id="taskList"></div>
+
+<script>
+    // ES6 arrow function to get tasks from localStorage
+    const getTasks = () => JSON.parse(localStorage.getItem('tasks')) || [];
+
+    // Save tasks back to localStorage
+    const saveTasks = tasks => localStorage.setItem('tasks', JSON.stringify(tasks));
+
+    // Add new task
+    const addTask = (taskText) => {
+        const tasks = getTasks();
+        const newTask = {
+            id: Date.now(),
+            text: taskText,
+            completed: false
+        };
+        tasks.push(newTask);
+        saveTasks(tasks);
+        renderTasks();
+    };
+
+    // Delete task
+    const deleteTask = (taskId) => {
+        let tasks = getTasks();
+        tasks = tasks.filter(task => task.id !== taskId);
+        saveTasks(tasks);
+        renderTasks();
+    };
+
+
+    // Toggle task completion
+    const toggleTaskCompletion = (taskId) => {
+        let tasks = getTasks();
+        tasks = tasks.map(task =>
+            task.id === taskId ? { ...task, completed: !task.completed } : task
+        );
+        saveTasks(tasks);
+        renderTasks();
+    };
+
+    // Render tasks dynamically
+    const renderTasks = () => {
+        const tasks = getTasks();
+        const taskList = document.getElementById('taskList');
+        taskList.innerHTML = tasks.map(({ id, text, completed }) => `
+            <div class="task ${completed ? 'task-complete' : ''}">
+                ${text}
+                <button class="delete-btn" onclick="deleteTask(${id})">Delete</button>
+                <button onclick="toggleComplete(${id})">
+                    ${completed ? 'Undo' : 'Complete'}
+                </button>
+            </div>
+        `).join('');
+    };
+
+    // Event listener for adding a task
+    document.getElementById('addTaskBtn').addEventListener('click', () => {
+        const taskInput = document.getElementById('taskInput');
+        const taskText = taskInput.value.trim();
+        if (taskText) {
+            addTask(taskText);
+            taskInput.value = '';
+        }
+    });
+
+    // Global functions for task actions (for onclick)
+    window.deleteTask = deleteTask;
+    window.toggleComplete = toggleTaskCompletion;
+
+    // Initial rendering of tasks
+    renderTasks();
+</script>
+
+```
+
+</body>
+</html>
